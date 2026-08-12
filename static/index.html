@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DocuMind</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --surface: #ffffff;
+      --surface-alt: #f1f3f7;
+      --border: #e2e5ec;
+      --text: #16181d;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-soft: #e8efff;
+      --danger: #dc2626;
+      --radius: 10px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f1115;
+      --surface: #171a20;
+      --surface-alt: #1e222a;
+      --border: #2a2f39;
+      --text: #e8eaed;
+      --muted: #9aa1ad;
+      --accent: #5b8cff;
+      --accent-soft: #1c2740;
+      --danger: #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 0 20px;
+      height: 56px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 16px;
+      font-weight: 650;
+      letter-spacing: -0.2px;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 11px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
+      background: var(--surface-alt);
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #eab308;
+    }
+
+    .dot.on {
+      background: #22c55e;
+    }
+
+    .dot.off {
+      background: var(--danger);
+    }
+
+    button,
+    select,
+    input {
+      font: inherit;
+      color: inherit;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 34px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-alt);
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+
+    .icon-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .layout {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+    }
+
+    aside {
+      width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      padding: 18px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+    }
+
+    .label {
+      font-size: 11px;
+      font-weight: 650;
+      letter-spacing: .7px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .drop {
+      padding: 22px 12px;
+      text-align: center;
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .drop:hover,
+    .drop.over {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .drop strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 550;
+    }
+
+    .drop small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    #picker {
+      display: none;
+    }
+
+    .doc {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 11px;
+      margin-bottom: 7px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      background: var(--surface-alt);
+    }
+
+    .doc-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .doc-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .doc-meta {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .doc button {
+      border: none;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 2px 4px;
+      border-radius: 5px;
+      font-size: 13px;
+    }
+
+    .doc button:hover {
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .doc button.del:hover {
+      color: var(--danger);
+    }
+
+    .empty-note {
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field-head {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12.5px;
+      color: var(--muted);
+      margin-bottom: 5px;
+    }
+
+    select,
+    input[type="range"] {
+      width: 100%;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 9px;
+      outline: none;
+    }
+
+    input[type="range"] {
+      padding: 0;
+      accent-color: var(--accent);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat {
+      padding: 9px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-alt);
+    }
+
+    .stat b {
+      display: block;
+      font-size: 17px;
+      font-weight: 650;
+    }
+
+    .stat span {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .side-actions {
+      margin-top: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .side-actions button {
+      flex: 1;
+      padding: 9px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface-alt);
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .side-actions button:hover {
+      border-color: var(--accent);
+    }
+
+    .side-actions .danger:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    #thread {
+      flex: 1;
+      overflow-y: auto;
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .welcome {
+      margin: auto;
+      max-width: 460px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .welcome h2 {
+      color: var(--text);
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 18px;
+    }
+
+    .chip {
+      padding: 7px 13px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      font-size: 13px;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .msg {
+      max-width: 760px;
+      width: fit-content;
+    }
+
+    .msg.you {
+      align-self: flex-end;
+    }
+
+    .bubble {
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .msg.you .bubble {
+      background: var(--accent);
+      color: #fff;
+      border-bottom-right-radius: 3px;
+    }
+
+    .msg.bot .bubble {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 3px;
+    }
+
+    .bubble code {
+      background: var(--surface-alt);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .msg.you .bubble code {
+      background: rgba(255, 255, 255, .2);
+    }
+
+    .cite {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .msg-foot {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 7px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .msg-foot button {
+      border: none;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0;
+    }
+
+    .msg-foot button:hover {
+      color: var(--accent);
+    }
+
+    details.sources {
+      margin-top: 9px;
+    }
+
+    details.sources summary {
+      cursor: pointer;
+      font-size: 12.5px;
+      color: var(--accent);
+      font-weight: 550;
+    }
+
+    .source {
+      margin-top: 8px;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-left: 2px solid var(--accent);
+      border-radius: 7px;
+      background: var(--surface-alt);
+      font-size: 12.5px;
+    }
+
+    .source-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .source-head em {
+      font-style: normal;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .source p {
+      color: var(--muted);
+    }
+
+    .composer {
+      display: flex;
+      gap: 10px;
+      padding: 14px 20px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+
+    .composer input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface-alt);
+      outline: none;
+    }
+
+    .composer input:focus {
+      border-color: var(--accent);
+    }
+
+    .composer button {
+      padding: 0 22px;
+      border: none;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 550;
+      cursor: pointer;
+    }
+
+    .composer button:disabled {
+      opacity: .5;
+      cursor: default;
+    }
+
+    .typing span {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      margin-right: 3px;
+      border-radius: 50%;
+      background: var(--muted);
+      animation: blink 1.2s infinite;
+    }
+
+    .typing span:nth-child(2) {
+      animation-delay: .2s;
+    }
+
+    .typing span:nth-child(3) {
+      animation-delay: .4s;
+    }
+
+    @keyframes blink {
+
+      0%,
+      60%,
+      100% {
+        opacity: .25;
+      }
+
+      30% {
+        opacity: 1;
+      }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 18px;
+      border-radius: 8px;
+      background: var(--text);
+      color: var(--bg);
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    @media (max-width: 820px) {
+      aside {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">Docu<span>Mind</span></div>
+    <div class="header-right">
+      <div class="pill"><i class="dot" id="dot"></i><span id="status">checking...</span></div>
+      <button class="icon-btn" id="theme-btn" title="Toggle theme">◐</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <div>
+        <div class="label">Documents</div>
+        <div class="drop" id="drop">
+          <strong>Drop PDFs here</strong>
+          <small>or click to browse</small>
+          <input type="file" id="picker" multiple accept="application/pdf">
+        </div>
+        <div id="docs" style="margin-top:12px"></div>
+      </div>
+
+      <div>
+        <div class="label">Library</div>
+        <div class="stats">
+          <div class="stat"><b id="s-docs">0</b><span>documents</span></div>
+          <div class="stat"><b id="s-pages">0</b><span>pages</span></div>
+          <div class="stat"><b id="s-words">0</b><span>words</span></div>
+          <div class="stat"><b id="s-chunks">0</b><span>chunks</span></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="label">Settings</div>
+        <div class="field">
+          <div class="field-head"><span>Model</span></div>
+          <select id="model"></select>
+        </div>
+        <div class="field">
+          <div class="field-head"><span>Sources per answer</span><span id="k-out">4</span></div>
+          <input type="range" id="k" min="1" max="10" value="4">
+        </div>
+        <div class="field">
+          <div class="field-head"><span>Creativity</span><span id="t-out">0.1</span></div>
+          <input type="range" id="temp" min="0" max="10" value="1">
+        </div>
+      </div>
+
+      <div class="side-actions">
+        <button id="export-btn">Export chat</button>
+        <button class="danger" id="reset-btn">Reset</button>
+      </div>
+    </aside>
+
+    <main>
+      <div id="thread"></div>
+      <form class="composer" id="composer">
+        <input id="prompt" placeholder="Ask something about your documents..." autocomplete="off">
+        <button type="submit" id="send">Ask</button>
+      </form>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const thread = $('thread');
+    let busy = false;
+
+    const esc = s => String(s).replace(/[&<>"']/g, c =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    const render = s => esc(s)
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\[p\.\s*(\d+)\]/gi, '<span class="cite">[p.$1]</span>');
+
+    function toast(text) {
+      const el = $('toast');
+      el.textContent = text;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    const savedTheme = localStorage.getItem('documind-theme');
+    if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+    $('theme-btn').onclick = () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('documind-theme', next);
+    };
+
+    $('k').oninput = e => $('k-out').textContent = e.target.value;
+    $('temp').oninput = e => $('t-out').textContent = (e.target.value / 10).toFixed(1);
+
+    function welcome(questions = []) {
+      const chips = questions.map(q => `<button class="chip">${esc(q)}</button>`).join('');
+      thread.innerHTML = `
+        <div class="welcome">
+          <h2>Ask your documents anything</h2>
+          <p>Everything runs locally. Answers cite the exact page they came from.</p>
+          <div class="chips">${chips}</div>
+        </div>`;
+      thread.querySelectorAll('.chip').forEach(chip => {
+        chip.onclick = () => { $('prompt').value = chip.textContent; ask(); };
+      });
+    }
+
+    function clearWelcome() {
+      const el = thread.querySelector('.welcome');
+      if (el) el.remove();
+    }
+
+    function addMessage(role, html) {
+      const wrap = document.createElement('div');
+      wrap.className = `msg ${role}`;
+      wrap.innerHTML = `<div class="bubble">${html}</div>`;
+      thread.appendChild(wrap);
+      thread.scrollTop = thread.scrollHeight;
+      return wrap;
+    }
+
+    function sourcesHtml(sources) {
+      if (!sources.length) return '';
+      const items = sources.map(s => `
+        <div class="source">
+          <div class="source-head">
+            <span>${esc(s.source)} · p.${s.page}/${s.total_pages}</span>
+            <em>${Math.round(s.score * 100)}% match</em>
+          </div>
+          <p>${esc(s.snippet)}</p>
+        </div>`).join('');
+      return `<details class="sources"><summary>${sources.length} source${sources.length > 1 ? 's' : ''}</summary>${items}</details>`;
+    }
+
+    async function ask() {
+      const input = $('prompt');
+      const question = input.value.trim();
+      if (!question || busy) return;
+
+      busy = true;
+      $('send').disabled = true;
+      clearWelcome();
+      addMessage('you', esc(question));
+      input.value = '';
+
+      const bot = addMessage('bot', '<div class="typing"><span></span><span></span><span></span></div>');
+      const bubble = bot.querySelector('.bubble');
+      let answer = '';
+      let sources = [];
+
+      try {
+        const response = await fetch('/api/chat/stream', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question,
+            k: Number($('k').value),
+            model: $('model').value || 'tinyllama',
+            temperature: Number($('temp').value) / 10
+          })
+        });
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop();
+
+          for (const part of parts) {
+            if (!part.startsWith('data: ')) continue;
+            const event = JSON.parse(part.slice(6));
+
+            if (event.type === 'sources') {
+              sources = event.sources;
+            } else if (event.type === 'token') {
+              answer += event.text;
+              bubble.innerHTML = render(answer);
+              thread.scrollTop = thread.scrollHeight;
+            } else if (event.type === 'error') {
+              answer = event.message;
+              bubble.innerHTML = render(answer);
+            } else if (event.type === 'done') {
+              bubble.innerHTML = render(answer) + sourcesHtml(sources);
+              const foot = document.createElement('div');
+              foot.className = 'msg-foot';
+              foot.innerHTML = `<span>${event.elapsed}s</span>`;
+              const copy = document.createElement('button');
+              copy.textContent = 'Copy';
+              copy.onclick = () => { navigator.clipboard.writeText(answer); toast('Answer copied'); };
+              foot.appendChild(copy);
+              bot.appendChild(foot);
+            }
+          }
+        }
+      } catch (error) {
+        bubble.textContent = 'Request failed: ' + error.message;
+      }
+
+      thread.scrollTop = thread.scrollHeight;
+      busy = false;
+      $('send').disabled = false;
+      input.focus();
+    }
+
+    $('composer').onsubmit = e => { e.preventDefault(); ask(); };
+
+    function paintDocs(documents, stats) {
+      const box = $('docs');
+      if (!documents.length) {
+        box.innerHTML = '<div class="empty-note">Nothing indexed yet.</div>';
+      } else {
+        box.innerHTML = documents.map(d => `
+          <div class="doc">
+            <div class="doc-info">
+              <div class="doc-name" title="${esc(d.filename)}">${esc(d.filename)}</div>
+              <div class="doc-meta">${d.total_pages} pages · ${(d.words / 1000).toFixed(1)}k words</div>
+            </div>
+            <button class="sum" data-file="${esc(d.filename)}" title="Summarize">≡</button>
+            <button class="del" data-file="${esc(d.filename)}" title="Remove">×</button>
+          </div>`).join('');
+
+        box.querySelectorAll('.sum').forEach(btn => btn.onclick = () => summarize(btn.dataset.file));
+        box.querySelectorAll('.del').forEach(btn => btn.onclick = () => removeDoc(btn.dataset.file));
+      }
+
+      $('s-docs').textContent = stats.documents;
+      $('s-pages').textContent = stats.pages;
+      $('s-words').textContent = stats.words > 999 ? (stats.words / 1000).toFixed(1) + 'k' : stats.words;
+      $('s-chunks').textContent = stats.chunks;
+    }
+
+    async function loadDocs() {
+      const data = await (await fetch('/api/documents')).json();
+      paintDocs(data.documents, data.stats);
+      return data;
+    }
+
+    async function summarize(filename) {
+      clearWelcome();
+      const bot = addMessage('bot', '<div class="typing"><span></span><span></span><span></span></div>');
+      try {
+        const data = await (await fetch(`/api/documents/${encodeURIComponent(filename)}/summary`)).json();
+        bot.querySelector('.bubble').innerHTML = `<strong>${esc(filename)}</strong><br><br>` + render(data.summary || data.detail);
+      } catch (error) {
+        bot.querySelector('.bubble').textContent = 'Could not summarize: ' + error.message;
+      }
+      thread.scrollTop = thread.scrollHeight;
+    }
+
+    async function removeDoc(filename) {
+      if (!confirm(`Remove ${filename} from the library?`)) return;
+      await fetch(`/api/documents/${encodeURIComponent(filename)}`, { method: 'DELETE' });
+      await loadDocs();
+      toast('Document removed');
+    }
+
+    const drop = $('drop');
+    const picker = $('picker');
+
+    drop.onclick = () => picker.click();
+    drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+    drop.ondragleave = () => drop.classList.remove('over');
+    drop.ondrop = e => {
+      e.preventDefault();
+      drop.classList.remove('over');
+      upload(e.dataTransfer.files);
+    };
+    picker.onchange = () => upload(picker.files);
+
+    async function upload(files) {
+      if (!files.length) return;
+      const form = new FormData();
+      for (const file of files) form.append('files', file);
+
+      const original = drop.innerHTML;
+      drop.innerHTML = '<strong>Indexing...</strong><small>extracting and embedding</small>';
+
+      try {
+        const response = await fetch('/api/documents', { method: 'POST', body: form });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'Upload failed');
+        paintDocs(data.documents, data.stats);
+        toast(`Indexed ${data.pages} pages`);
+        loadSuggestions();
+      } catch (error) {
+        toast(error.message);
+      }
+
+      drop.innerHTML = original;
+      picker.value = '';
+    }
+
+    async function loadSuggestions() {
+      if (thread.querySelector('.msg')) return;
+      try {
+        const data = await (await fetch('/api/suggestions')).json();
+        if (data.questions.length) welcome(data.questions);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    $('export-btn').onclick = () => window.open('/api/history/export', '_blank');
+
+    $('reset-btn').onclick = async () => {
+      if (!confirm('Delete all documents and clear the chat?')) return;
+      await fetch('/api/reset', { method: 'POST' });
+      await loadDocs();
+      welcome();
+      toast('Library reset');
+    };
+
+    async function checkHealth() {
+      try {
+        const data = await (await fetch('/api/health')).json();
+        const dot = $('dot');
+        dot.className = 'dot ' + (data.ollama.running ? 'on' : 'off');
+        $('status').textContent = data.ollama.running
+          ? `${data.ollama.models.length} model${data.ollama.models.length === 1 ? '' : 's'} ready`
+          : 'Ollama offline';
+
+        const select = $('model');
+        const current = select.value;
+        select.innerHTML = (data.ollama.models.length ? data.ollama.models : ['tinyllama'])
+          .map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+        if (current) select.value = current;
+      } catch (error) {
+        $('dot').className = 'dot off';
+        $('status').textContent = 'server unreachable';
+      }
+    }
+
+    welcome();
+    checkHealth();
+    loadDocs().then(data => { if (data.documents.length) loadSuggestions(); });
+    setInterval(checkHealth, 20000);
+    document.addEventListener('keydown', e => {
+      if (e.key === '/' && document.activeElement !== $('prompt')) {
+        e.preventDefault();
+        $('prompt').focus();
+      }
+    });
+  </script>
+</body>
+
+</html>

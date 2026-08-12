@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.so
+
+data/
+vector_store/
+*.log
+documind-chat.md
+
+.venv/
+venv/
+env/
+ENV/
+.idea/
+.vscode/
+.DS_Store
