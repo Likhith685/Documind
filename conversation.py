@@ -290,3 +290,4 @@ class DocuMindEngine:
 
     def clear_history(self) -> None:
         self.memory.clear()
+
